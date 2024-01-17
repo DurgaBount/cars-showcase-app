@@ -8,11 +8,18 @@ import { Listbox, Transition } from "@headlessui/react";
 import { updateSearchParams } from "@/utils";
 import { CustomFilterProps } from "@/types";
 
-export default function CustomFilter({ title, options }: CustomFilterProps) {
+export default function CustomFilter({
+  title,
+  options,
+  selected,
+  setSelected,
+}: CustomFilterProps) {
   const router = useRouter();
-  const [selected, setSelected] = useState(options[0]); // State for storing the selected option
+  //const [selected, setSelected] = useState(options[0]);
 
-  // update the URL search parameters and navigate to the new URL
+  console.log("Selected", selected);
+  console.log("options", options);
+
   const handleUpdateParams = (e: { title: string; value: string }) => {
     const newPathName = updateSearchParams(title, e.value.toLowerCase());
 
@@ -24,14 +31,19 @@ export default function CustomFilter({ title, options }: CustomFilterProps) {
       <Listbox
         value={selected}
         onChange={(e) => {
-          setSelected(e); // Update the selected option in state
+          console.log("EEEE", e);
+          console.log("Selected", selected);
+
+          setSelected(e.value); // Update the selected option in state
           handleUpdateParams(e); // Update the URL search parameters and navigate to the new URL
         }}
       >
         <div className="relative w-fit z-10">
           {/* Button for the listbox */}
           <Listbox.Button className="custom-filter__btn">
-            <span className="block truncate">{selected.title}</span>
+            <span className="block truncate">
+              {selected ? selected : options[0].title}
+            </span>
             <Image
               src="/chevron-up-down.svg"
               width={20}

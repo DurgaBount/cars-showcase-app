@@ -1,16 +1,37 @@
+"use client";
+
 import Image from "next/image";
-import { CarCard, CustomFilter, Hero, SearchBar } from "@/components";
+import { CarCard, CustomFilter, Hero, SearchBar, ShowMore } from "@/components";
 import { fetchCars } from "@/utils";
 import { fuels, yearsOfProduction } from "@/constants";
+import { useEffect, useState } from "react";
 
-export default async function Home({ searchParams }: any) {
-  const allCars = await fetchCars({
-    manufacturer: searchParams.manufacturer || "",
-    year: searchParams.year || 2022,
-    fuel: searchParams.fuel || "",
-    limit: searchParams.limit || 10,
-    model: searchParams.model || "",
-  });
+export default function Home() {
+  const [allCars, setAllCars] = useState([]);
+  const [year, setYear] = useState(2022);
+  const [fuel, setFuel] = useState("");
+  const [limit, setLimit] = useState(10);
+  const [model, setModel] = useState("");
+  const [manufacturer, setManuFacturer] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("manufacturer", manufacturer);
+      console.log("model", model);
+
+      const results = await fetchCars({
+        manufacturer: manufacturer,
+        year: year,
+        fuel: fuel,
+        limit: limit,
+        model: model,
+      });
+
+      setAllCars(results);
+    };
+
+    fetchData(); // Call the async function
+  }, [year, fuel, limit, model, manufacturer]);
 
   console.log(allCars);
 
@@ -27,11 +48,34 @@ export default async function Home({ searchParams }: any) {
         </div>
 
         <div className="home__filters">
-          <SearchBar />
+          <SearchBar
+            manufacturer={manufacturer}
+            setManuFacturer={(res: any) => {
+              console.log("manufacturerres", res);
+
+              setManuFacturer(res);
+            }}
+            model={model}
+            setModel={(res: any) => {
+              console.log("modelres", res);
+
+              setModel(res);
+            }}
+          />
 
           <div className="home__filter-container">
-            <CustomFilter title="fuel" options={fuels} />
-            <CustomFilter title="year" options={yearsOfProduction} />
+            <CustomFilter
+              title="fuel"
+              options={fuels}
+              selected={fuel}
+              setSelected={setFuel}
+            />
+            <CustomFilter
+              title="year"
+              options={yearsOfProduction}
+              selected={year}
+              setSelected={setYear}
+            />
           </div>
         </div>
 
@@ -42,11 +86,16 @@ export default async function Home({ searchParams }: any) {
                 <CarCard key={index} car={car} />
               ))}
             </div>
+            <ShowMore
+              pageNumber={(limit || 10) / 10}
+              isNext={(limit || 10) > allCars.length}
+              setLimit={setLimit}
+            />
           </section>
         ) : (
           <div className="home__error-container">
             <h2 className="text-black text-xl font-bold">Oops, no resultss</h2>
-            <p>{allCars?.message}</p>
+            {/* <p>{allCars?.message}</p> */}
           </div>
         )}
       </div>
